@@ -1,10 +1,13 @@
+#include %A_LineFile%\..\json.ahk
+
 class GUIFunctions
 {
     isDarkMode := false
+    CurrentTheme := ""
+
     AddTab(Tabname){
         addedTabs := Tabname . "|"
         GuiControl,ICScriptHub:,ModronTabControl, % addedTabs
-        ; TODO: contain tablist
         g_TabList .= addedTabs
         ; Increase UI width to accommodate new tab.
         StrReplace(g_TabList,"|",,tabCount)
@@ -31,19 +34,63 @@ class GUIFunctions
     AddToolTip(controlVariableName, tipMessage)
     {
         global
-        WinGet ICScriptHub_ID, ID, A
-        GuiControl ICScriptHub:Focus, %controlVariableName%
-        ControlGetFocus toolTipTarget, ahk_id %ICScriptHub_ID%
+        toolTipTarget := this.GetToolTipTarget(controlVariableName)
         g_MouseToolTips[toolTipTarget] := tipMessage
     }
 
-    SetThemeTextColor()
-    {  
-        if(this.isDarkMode)
-            Gui, ICScriptHub:Font, cSilver w400
-        else
-            Gui, ICScriptHub:Font, cDefault w400
+    GetToolTipTarget(controlVariableName)
+    {
+        global
+        WinGet ICScriptHub_ID, ID, A
+        GuiControl ICScriptHub:Focus, %controlVariableName%
+        ControlGetFocus toolTipTarget, ahk_id %ICScriptHub_ID%
+        return toolTipTarget
     }
+
+    LoadTheme(guiName := "ICScriptHub")
+    {
+        this.GUIName := guiName
+        objData := ""
+        if(this.CurrentTheme != "")
+            return
+        FileName := A_LineFile . "\..\..\Themes\CurrentTheme.json"
+        if(FileExist(FileName))
+        {
+            FileRead, objData, %FileName%
+        }
+        else
+        {
+            FileName := A_LineFile . "\..\..\Themes\DefaultTheme.json"
+            FileRead, objData, %FileName%
+        }
+        
+        this.CurrentTheme := JSON.parse( objData )
+        this.isDarkMode := this.currentTheme["UseDarkThemeGraphics"]
+    }
+
+    UseThemeTextColor(textType := "default", weight := 400)
+    {  
+        guiName := this.GUIName
+        if(textType == "default")
+            textType := "DefaultTextColor"
+        textColor := this.CurrentTheme[textType]
+        Gui, %guiName%:Font, c%textColor% w%weight%
+    }
+
+    UseThemeBackgroundColor()
+    {
+        guiName := this.GUIName
+        windowColor := this.CurrentTheme[ "WindowColor" ]
+        Gui, %guiName%:Color, % windowColor
+    }
+
+    UseThemeListViewBackgroundColor(controlID := "")
+    {
+        guiName := this.GUIName
+        bgColor := this.CurrentTheme[ "TableBackgroundColor" ]
+        GuiControl, %guiName%: +Background%bgColor%, %controlID%
+    }
+
     ;------------------------------
     ;
     ; Function: LVM_CalculateSize

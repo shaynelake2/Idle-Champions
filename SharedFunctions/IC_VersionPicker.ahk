@@ -2,23 +2,29 @@
 #include %A_LineFile%\..\json.ahk
 #include %A_LineFile%\..\MemoryRead\classMemory.ahk
 #include %A_LineFile%\..\CLR.ahk
-#include %A_LineFile%\..\MemoryRead\Imports\IC_GameVersion64_Import.ahk
-#include %A_LineFile%\..\MemoryRead\Imports\IC_GameVersion32_Import.ahk
+#include *i %A_LineFile%\..\MemoryRead\Imports\IC_GameVersion64_Import.ahk
+#include *i %A_LineFile%\..\MemoryRead\Imports\IC_GameVersion32_Import.ahk
+#include %A_LineFile%\..\IC_GUIFunctions_Class.ahk
+
 Gui, ICSHVersionPicker:New
+GUIFunctions.LoadTheme("ICSHVersionPicker")
+GUIFunctions.UseThemeBackgroundColor()
+GUIFunctions.UseThemeTextColor()
 Gui, ICSHVersionPicker:+Resize -MaximizeBox
-Gui, ICSHVersionPicker:Add, Text, w100, Platform:
+Gui, ICSHVersionPicker:Add, GroupBox, w300 h75, Pointer Select: 
+Gui, ICSHVersionPicker:Add, Text, xp+10 yp+15 w100, Platform:
 Gui, ICSHVersionPicker:Add, DropDownList, yp+15 w100 vVersionPickerPlatformDropdown gVersionPickerUpdateVersions,
-Gui, ICSHVersionPicker:Add, Text, y6 x+10 w50, Version:
+Gui, ICSHVersionPicker:Add, Text, y22 x+10 w50, Version:
 Gui, ICSHVersionPicker:Add, DropDownList, yp+15 w50 vVersionPickerVersionDropdown gVersionPickerResetText,
 Gui, ICSHVersionPicker:Add, Button, x+5 w50 vVersionPickerSaveButton gVersionPickerSaveChoice, Save
-Gui, ICSHVersionPicker:Add, Text, x10 y+5 w300 vVersionPickerSuggestionText, Checking...
+Gui, ICSHVersionPicker:Add, Text, x20 y+5 w275 vVersionPickerSuggestionText, Checking...
 ;Gui, ICSHVersionPicker:Font, w700
-Gui, ICSHVersionPicker:Add, Text, x10 y+1 w300 h26 vVersionPickerSuggestionText2, 
+Gui, ICSHVersionPicker:Add, Text, x20 y+8 w300 h26 vVersionPickerSuggestionText2, 
 Gui, ICSHVersionPicker:Font, w400
-Gui, ICSHVersionPicker:Add, Text, x10 y+2 w300 vVersionPickerDetectionText, Script Hub Recommends: Checking...
+Gui, ICSHVersionPicker:Add, Text, x13 y+2 w300 vVersionPickerDetectionText, Script Hub Recommends: Checking...
 Gui, ICSHVersionPicker:Show, , Memory Version Picker
 
-global scriptLocation := A_LineFile . "/../"
+global scriptLocation := A_LineFile . "\..\"
 global g_VersionPickerPlatformChoice
 global g_VersionPickerVersionChoice
 global GameObj := LoadObjectFromJSON( scriptLocation . "PointerData.json")
@@ -54,7 +60,7 @@ WriteObjectToJSON( FileName, ByRef object )
     if(FileExist(FileName))
         FileDelete, %FileName%
     FileAppend, %objectJSON%, %FileName%
-    return
+    return ErrorLevel
 }
 
 ; Sets suggestion text back to empty
@@ -75,6 +81,7 @@ VersionPickerUpdateVersions()
     {
         versionComboBoxOptions .= k . "|"
     }
+    Sort, versionComboBoxOptions, N D|
     GuiControl,ICSHVersionPicker:, VersionPickerVersionDropdown, %versionComboBoxOptions%
 }
 
@@ -88,11 +95,23 @@ VersionPickerSaveChoice()
         MsgBox, Please select both the platform and version.
         return
     }
-    WriteObjectToJSON(scriptLocation . "MemoryRead/CurrentPointers.json", GameObj[VersionPickerPlatformDropdown][VersionPickerVersionDropdown] )
-    MsgBox, Settings saved! ; Close/Restart all running Script Hub scripts before continuing.
+    pointersToWrite := GameObj[VersionPickerPlatformDropdown][VersionPickerVersionDropdown]
+    pointersToWrite["Platform"] := VersionPickerPlatformDropdown
+    pointersToWrite["Version"] := VersionPickerVersionDropdown
+    failedWrite := WriteObjectToJSON(scriptLocation . "MemoryRead\CurrentPointers.json", pointersToWrite )
+    if !failedWrite
+    {
+        MsgBox, Settings saved! ; Close/Restart all running Script Hub scripts before continuing.
+    }
+    else
+    {
+        MsgBox,1,, There was a problem saving the settings. Closing script.
+        IfMsgBox, OK
+            ExitApp
+        IfMsgBox, Cancel
+            return
+    }
     OutputDebug, % "Pointer Version Saved!"
-    scriptHubLoc := A_LineFile . "\..\..\ICScriptHub.ahk"
-    Run, %scriptHubLoc%
     ICSHVersionPickerGuiClose()
 }
 
@@ -111,18 +130,20 @@ ChooseRecommendation()
     defaultPaths := []
     defaultPaths[1] := "C:\Program Files (x86)\Steam\steamapps\common\IdleChampions\" ; Steam
     defaultPaths[2] := "C:\Program Files\Epic Games\IdleChampions" ; Epic
-    defaultPaths[3] := "" ; Kartridge
+    defaultPaths[3] := "%AppData%\..\Local\Kartridge.kongregate.com\games\309647" ; Kartridge
     defaultPaths[4] := "" ; CNE
     settingsJSONPath := A_LineFile . "\..\..\Settings.json"
     settings := LoadObjectFromJSON( settingsJSONPath )
     settingsGamePath := settings.InstallPath
 
     hWnd := WinExist("ahk_exe IdleDragons.exe")
+    if(!hWnd)
+        hWnd := WinExist("ahk_exe " . settings.ExeName )
     WinGet, pPath, ProcessPath, % "ahk_id " hWnd
     exePath := pPath . "\..\"
 
-    
-    platform := CheckPlatformByPath(exePath)
+    if(exePath != "\..\")
+        platform := CheckPlatformByPath(exePath)
     if(!platform)
         platform := CheckPlatformByPath(settingsGamePath)
     if(!platform AND hWnd)
@@ -134,7 +155,8 @@ ChooseRecommendation()
         platform := CheckPlatformByPath(gamePath, false)
     }
 
-    version := CheckVersionByPath(exePath)
+    if(exePath != "\..\")
+        version := CheckVersionByPath(exePath)
     checkVersion := platform ? true : false
     if(!version)
         version := CheckVersionByPath(settingsGamePath, checkVersion)
@@ -159,11 +181,11 @@ ChooseRecommendation()
             closest := version
             break
         }
-        else if (version > k)
+        else if (version > k AND closest < k)
         {
             closest := k
         }
-        else if version < k
+        else if (version < k)
         {
             closest := k
             break
@@ -171,17 +193,17 @@ ChooseRecommendation()
     }
 
     successMessage := (version == closest) ? "A match has been selected." :  "The closest match has been selected."
-    versionTextColor := (version == closest AND version != "") ?  "cGREEN" : "cF18500"
+     versionTextColor := (version == closest AND version != "") ?  "cGREEN" : "cF18500"
     importsVersionMessage := ""
     if(platform == "" AND version == "")
         importsVersionMessage := ""
     else if(platform AND version == "")
-        importsVersionMessage .= "Unknown version. Selected [" . closest . "], Script [" . GetImportsVersionByPlatform(platform) . "]"
-    else if(IsVersionMatchToImports(platform, version))
-        importsVersionMessage .= "Imports match version [" . GetImportsVersionByPlatform(platform) . "]." 
+        importsVersionMessage .= "Unknown version. Selected [" . closest . "], Script [" . GetImportsVersion(platform, version, closest) . "]"
+    else if(GetImportsVersion(platform, version, closest) == version)
+        importsVersionMessage .= "Imports match version [" . GetImportsVersion(platform, version, closest) . "]." 
     else
-        importsVersionMessage .= "Imports version mismatch. Game [" . version . "], Script [" . GetImportsVersionByPlatform(platform) . "]`nCheck Discord and Github for updated Imports"
-    textColor := IsVersionMatchToImports(platform, version) ? "cGREEN" : "cF18500"
+        importsVersionMessage .= "Imports version mismatch. Game [" . version . "], Script [" . GetImportsVersion(platform, version, closest)  . "]`nCheck Discord and Github for updated Imports"
+    textColor := IsVersionMatchToImports(platform, version, closest) ? "cGREEN" : "cF18500"
     GuiControl, choosestring, VersionPickerVersionDropdown, %closest%
     if(version AND platform)
         GuiControl, ICSHVersionPicker:, VersionPickerSuggestionText, % successMessage
@@ -222,8 +244,7 @@ CheckPlatformByPathContents(gamePath)
     CNELauncherPath := gamePath . "..\IdleDragonsLauncher.exe"
     if(FileExist(CNELauncherPath))
         return "CNE"
-    ; check path for Kartridge ?
-    if(Kartridge)
+    if(InStr(gamePath, "Kartridge", False))
         return "Kartridge"
     return ""
 }
@@ -348,22 +369,32 @@ CheckDLLVersion(dllPath)
     return version
 }
 
-IsVersionMatchToImports(platform, version)
+IsVersionMatchToImports(platform, version, closest)
 {
-    importsVersion := GetImportsVersionByPlatform(platform)
+    importsVersion := GetImportsVersion(platform, version, closest)
     if(version == importsVersion)
         return true
     else
         return false
 }
 
-GetImportsVersionByPlatform(platform)
+GetImportsVersion(platform, version, closest := 0)
 {
-    if(platform == "Steam" OR platform == "EGS")
+    is64bit := GetArchitectureByPlatformAndVersion(platform, version)
+    if (is64bit == "")
+        is64bit := GetArchitectureByPlatformAndVersion(platform, closest)
+    if(is64bit)
         importsVersion := g_ImportsGameVersion64 . g_ImportsGameVersionPostFix64
-    else if(platform == "CNE")
+    else
         importsVersion := g_ImportsGameVersion32 . g_ImportsGameVersionPostFix32
     return importsVersion
+}
+
+GetArchitectureByPlatformAndVersion(platform, version)
+{
+    if(GameObj AND GameObj[platform] AND GameObj[platform][version])
+        is64Bit := GameObj[platform][version]["is64"]
+    return is64Bit
 }
 
 ; Attempts to verify working pointers by checking if a valid game version can be read.

@@ -33,6 +33,8 @@ class IC_SharedData_Class
     BadAutoProgress := 0
     PreviousStacksFromOffline := 0
     TargetStacks := 0
+    ShiniesByChamp := {}
+    ShiniesByChampJson := ""
 
     Close()
     {
@@ -98,14 +100,24 @@ class IC_SharedFunctions_Class
     ; returns this class's version information (string)
     GetVersion()
     {
-        return "v2.5.7, 2022-08-22"
+        return "v2.6.4, 2023-03-06"
     }
 
     ;Gets data from JSON file
     LoadObjectFromJSON( FileName )
     {
         FileRead, oData, %FileName%
-        return JSON.parse( oData )
+        data := "" 
+        try
+        {
+            data := JSON.parse( oData )
+        }
+        catch err
+        {
+            err.Message := err.Message . "`nFile:`t" . FileName
+            throw err
+        }
+        return data
     }
 
     ;Writes beautified json (object) to a file (FileName)
@@ -137,9 +149,60 @@ class IC_SharedFunctions_Class
         return false
     }
 
+    ; Parses a response from an open chests call to tally shiny counts by champ and slot. Returns count of shinies
+    ParseChestResults( chestResults )
+    {
+        shinies := 0
+        for k, v in chestResults.loot_details
+        {
+            if v.gilded
+            {
+                shinies += 1
+                g_SharedData.ShiniesByChamp[v.hero_id] := (g_SharedData.ShiniesByChamp[v.hero_id] != "" ? g_SharedData.ShiniesByChamp[v.hero_id] : {})
+                g_SharedData.ShiniesByChamp[v.hero_id][v.slot_id] := ((g_SharedData.ShiniesByChamp[v.hero_id][v.slot_id] != "") ? (g_SharedData.ShiniesByChamp[v.hero_id][v.slot_id] + 1) : 1)
+                ;string := "New shiny! Champ ID: " . v.hero_id . " (Slot " . v.slot_id . ")`n"
+            }
+        }
+        g_SharedData.ShiniesByChampJson := JSON.Stringify(g_SharedData.ShiniesByChamp)
+        return shinies
+    }
+
     ;====================================================
     ;General use functions, useful for a variety of tasks
     ;====================================================
+
+    /*  KillCurrentBoss - Switches to e formation and kills the boss
+
+        Parameters:
+        maxLoopTime ;Maximum time, in milliseconds, the loop will continue.
+
+        Returns: 1 on current boss zone cleared, 0 otherwise
+
+    */
+    KillCurrentBoss( maxLoopTime := 25000 )
+    {
+        CurrentZone := this.Memory.ReadCurrentZone()
+        if mod( CurrentZone, 5 )
+            return 1
+        StartTime := A_TickCount
+        ElapsedTime := 0
+        counter := 0
+        sleepTime := 67
+        g_SharedData.LoopString := "Killing boss before stacking."
+        while ( !mod( this.Memory.ReadCurrentZone(), 5 ) AND ElapsedTime < maxLoopTime )
+        {
+            ElapsedTime := A_TickCount - StartTime
+            this.DirectedInput(,,"{e}")
+            if(!this.Memory.ReadQuestRemaining()) ; Quest complete, still on boss zone. Skip boss bag.
+                this.ToggleAutoProgress(1,0,false)
+            Sleep, %sleepTime%
+        }
+        if(ElapsedTime >= maxLoopTime)
+            return 0
+        this.WaitForTransition()
+        return 1
+    }
+
     /*  FallBackFromBossZone - A function that does what it says.
 
         Parameters:
@@ -326,7 +389,6 @@ class IC_SharedFunctions_Class
         ; }
         timeout := 33
         directedInputStart := A_TickCount
-        ;hwnd := "ahk_exe IdleDragons.exe"
         hwnd := this.Hwnd
         ControlFocus,, ahk_id %hwnd%
         ;while (ErrorLevel AND A_TickCount - directedInputStart < timeout * 10)  ; testing reliability
@@ -473,7 +535,7 @@ class IC_SharedFunctions_Class
         ; try to progress
         this.DirectedInput(,,"{Right}")
         this.ToggleAutoProgress(1)
-        this.ModronResetZone := this.Memory.GetCoreTargetAreaByInstance(this.Memory.ReadActiveGameInstance()) ; once per zone in case user changes it mid run.
+        this.ModronResetZone := this.Memory.GetModronResetArea() ; once per zone in case user changes it mid run.
         g_PreviousZoneStartTime := A_TickCount
         Critical, Off
     }
@@ -494,7 +556,7 @@ class IC_SharedFunctions_Class
         if (dtCurrentZoneTime > 45 AND fallBackTries < 3 AND dtCurrentZoneTime - lastCheck > 15) ; second check - Fall back to previous zone and try to continue
         {
             ; reset memory values in case they missed an update.
-            this.Hwnd := WinExist( "ahk_exe IdleDragons.exe" )
+            this.Hwnd := WinExist( "ahk_exe " . g_userSettings[ "ExeName"] )
             this.Memory.OpenProcessReader()
             this.ResetServerCall()
             ; try a fall back
@@ -637,16 +699,17 @@ class IC_SharedFunctions_Class
         if ( string != "" )
             string := ": " . string
         g_SharedData.LoopString := "Closing IC" . string
-        if WinExist( "ahk_exe IdleDragons.exe" )
-            SendMessage, 0x112, 0xF060,,, ahk_exe IdleDragons.exe,,,, 10000 ; WinClose
+        sendMessageString := "ahk_exe " . g_userSettings[ "ExeName"]
+        if WinExist( "ahk_exe " . g_userSettings[ "ExeName"] )
+            SendMessage, 0x112, 0xF060,,, %sendMessageString%,,,, 10000 ; WinClose
         StartTime := A_TickCount
         ElapsedTime := 0
-        while ( WinExist( "ahk_exe IdleDragons.exe" ) AND ElapsedTime < 10000 )
+        while ( WinExist( "ahk_exe " . g_userSettings[ "ExeName"] ) AND ElapsedTime < 10000 )
         {
             Sleep, 200
             ElapsedTime := A_TickCount - StartTime
         }
-        while ( WinExist( "ahk_exe IdleDragons.exe" ) ) ; Kill after 10 seconds.
+        while ( WinExist( "ahk_exe " . g_userSettings[ "ExeName"] ) ) ; Kill after 10 seconds.
             WinKill
         return
     }
@@ -654,44 +717,49 @@ class IC_SharedFunctions_Class
     ; Attemps to open IC. Game should be closed before running this function or multiple copies could open.
     OpenIC()
     {
+        timeoutVal := 32000
         loadingDone := false
         g_SharedData.LoopString := "Starting Game"
         waitForProcessTime := g_UserSettings[ "WaitForProcessTime" ]
         WinGetActiveTitle, savedActive
         this.SavedActiveWindow := savedActive
-        while ( !loadingZone AND ElapsedTime < 32000 )
+        while ( !loadingZone AND ElapsedTime < timeoutVal )
         {
             this.Hwnd := 0
             this.PID := 0
-            while (!this.PID)
+            while (!this.PID AND ElapsedTime < timeoutVal )
             {
                 StartTime := A_TickCount
                 ElapsedTime := 0
                 g_SharedData.LoopString := "Opening IC.."
-                programLoc := g_UserSettings[ "InstallPath" ] . g_UserSettings ["ExeName" ]
+                programLoc := g_UserSettings[ "InstallPath" ]
                 Run, %programLoc%
                 Sleep, %waitForProcessTime%
                 while(ElapsedTime < 10000 AND !this.PID )
                 {
                     ElapsedTime := A_TickCount - StartTime
-                    Process, Exist, IdleDragons.exe
+                    existingProcessID := g_userSettings[ "ExeName"]
+                    Process, Exist, %existingProcessID%
                     this.PID := ErrorLevel
                 }
             }
             ; Process exists, wait for the window:
-            while(!(this.Hwnd := WinExist( "ahk_exe IdleDragons.exe" )) AND ElapsedTime < 32000)
+            while(!(this.Hwnd := WinExist( "ahk_exe " . g_userSettings[ "ExeName"] )) AND ElapsedTime < timeoutVal)
             {
                 WinGetActiveTitle, savedActive
                 this.SavedActiveWindow := savedActive
                 ElapsedTime := A_TickCount - StartTime
             }
-            this.ActivateLastWindow()
-            Process, Priority, % this.PID, High
-            this.Memory.OpenProcessReader()
-            loadingZone := this.WaitForGameReady()
-            this.ResetServerCall()
+            if(ElapsedTime < timeoutVal)
+            {
+                this.ActivateLastWindow()
+                Process, Priority, % this.PID, High
+                this.Memory.OpenProcessReader()
+                loadingZone := this.WaitForGameReady()
+                this.ResetServerCall()
+            }
         }
-        if(ElapsedTime >= 30000)
+        if(ElapsedTime >= timeoutVal)
             return -1 ; took too long to open
         else
             return 0
@@ -736,11 +804,11 @@ class IC_SharedFunctions_Class
         }
         ; timed out
         secondsToTimeout := Floor(timeout/ 1000)
-        this.CloseIC( "WaitForGameReady-Failed to finish in " . secondsToTimeout . "s." )
+        this.CloseIC( "WaitForGameReady-Failed to finish in " . secondsToTimeout . "s." )       
         return false
     }
 
-    ; Waits until stats are finished updating from offline progress calculations. (Currently just Sleep, 1200)
+    ; Waits until stats are finished updating from offline progress calculations.
     WaitForFinalStatUpdates()
     {
         g_SharedData.LoopString := "Waiting for offline progress (Area Active)..."
@@ -757,7 +825,7 @@ class IC_SharedFunctions_Class
     ;Reopens Idle Champions if it is closed. Calls RecoverFromGameClose after opening IC. Returns true if window still exists.
     SafetyCheck()
     {
-        if (Not WinExist( "ahk_exe IdleDragons.exe" ))
+        if (Not WinExist( "ahk_exe " . g_userSettings[ "ExeName"] ))
         {
             if(this.OpenIC() == -1)
             {
@@ -773,8 +841,9 @@ class IC_SharedFunctions_Class
          ; game loaded but can't read zone? failed to load proper on last load? (Tests if game started without script starting it)
         else if ( this.Memory.ReadCurrentZone() == "" )
         {
-            this.Hwnd := WinExist( "ahk_exe IdleDragons.exe" )
-            Process, Exist, IdleDragons.exe
+            this.Hwnd := WinExist( "ahk_exe " . g_userSettings[ "ExeName"] )
+            existingProcessID := g_userSettings[ "ExeName"]
+            Process, Exist, %existingProcessID%
             this.PID := ErrorLevel
             this.Memory.OpenProcessReader()
             this.ResetServerCall()
@@ -782,6 +851,7 @@ class IC_SharedFunctions_Class
         return true
     }
 
+    ; Checks for rollbacks after a stack restart.
     BadSaveTest()
     {
         if(this.CurrentZone != "" and this.CurrentZone - 1 > g_SF.Memory.ReadCurrentZone())
@@ -796,7 +866,7 @@ class IC_SharedFunctions_Class
         static gameLoaded := false
         if(this.Memory.ReadCurrentZone() == "")
         {
-            if (Not WinExist( "ahk_exe IdleDragons.exe" ))
+            if (Not WinExist( "ahk_exe " . g_userSettings[ "ExeName"] ))
             {
                 gameLoaded := false
             }
@@ -898,8 +968,10 @@ class IC_SharedFunctions_Class
         this.InstanceID := this.Memory.ReadInstanceID()
         ; needed to know if there are enough chests to open using server calls
         this.TotalGems := this.Memory.ReadGems()
-        this.TotalSilverChests := this.Memory.GetChestCountByID(1)
-        this.TotalGoldChests := this.Memory.GetChestCountByID(2)
+        silverChests := this.Memory.GetChestCountByID(1)
+        goldChests := this.Memory.GetChestCountByID(2)
+        this.TotalSilverChests := (silverChests != "") ? silverChests : 0
+        this.TotalGoldChests := (goldChests != "") ? goldChests : 0
     }
 
     ; Forces an adventure restart through closing IC and using server calls
@@ -1036,10 +1108,11 @@ class IC_SharedFunctions_Class
         {
             txtCheck := "Unable to read adventure data."
             txtCheck .= "`n1. Please load into a valid adventure. Current adventure shows as: " . (CurrentObjID ? CurrentObjID : "-- Error --")
-            txtCheck .= "`n2. Check the correct memory file is being used. `n    Current version: " . this.Memory.GameManager.GetVersion()
-            txtcheck .= "`n3. If IC is running with admin privileges, then the script will also require admin privileges."
+            txtcheck .= "`n2. Make sure the game exe in Game Location settings is set to ""IdleDragons.exe"""
+            txtCheck .= "`n3. Check the correct memory file is being used. `n    Current version: " . this.Memory.GameManager.GetVersion()
+            txtcheck .= "`n4. If IC is running with admin privileges, then the script will also require admin privileges."
             if (this.Memory.GameManager.is64bit())
-                txtcheck .= "`n4. Check AHK is 64bit."
+                txtcheck .= "`n5. Check AHK is 64bit."
             MsgBox, 5,, % txtCheck
 
             IfMsgBox, Retry
@@ -1064,17 +1137,18 @@ class IC_SharedFunctions_Class
     ResetServerCall()
     {
         this.SetUserCredentials()
-        g_ServerCall := new IC_ServerCalls_Class( this.UserID, this.UserHash, this.InstanceID )
+        previousPatron := g_ServerCall.activePatronID ? g_ServerCall.activePatronID : 0 
+        g_ServerCall := new IC_ServerCalls_Class( this.UserID, this.UserHash, this.InstanceID ) ; Note: resets patronID to 0
         version := this.Memory.ReadBaseGameVersion()
         if(version != "")
             g_ServerCall.clientVersion := version
         tempWebRoot := this.Memory.ReadWebRoot()
-        httpString := StrSplit(tempWebRoot,":")
+        httpString := StrSplit(tempWebRoot,":")[1]
         isWebRootValid := httpString == "http" or httpString == "https"
-        g_ServerCall.webroot := isWebRootValid ? this.Memory.ReadWebRoot() : g_ServerCall.webroot
+        g_ServerCall.webroot := isWebRootValid ? tempWebRoot : g_ServerCall.webroot
         g_ServerCall.networkID := this.Memory.ReadPlatform() ? this.Memory.ReadPlatform() : g_ServerCall.networkID
         g_ServerCall.activeModronID := this.Memory.ReadActiveGameInstance() ? this.Memory.ReadActiveGameInstance() : 1 ; 1, 2, 3 for modron cores 1, 2, 3
-        g_ServerCall.activePatronID := this.Memory.ReadPatronID() == "" ? g_ServerCall.activePatronID : this.Memory.ReadPatronID() ; 0 = no patron
+        g_ServerCall.activePatronID := this.Memory.ReadPatronID() == "" ? previousPatron : this.Memory.ReadPatronID() ; 0 = no patron
         g_ServerCall.UpdateDummyData()
     }
 
@@ -1089,7 +1163,7 @@ class IC_SharedFunctions_Class
         consume := this.IsBrivMetalborn() ? -.032 : -.04  ;Default := 4%, SteelBorn := 3.2%
         skipAmount := ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadSkipAmount()
         skipChance := ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadSkipChance()
-        distance := this.Memory.GetCoreTargetAreaByInstance(this.Memory.ReadActiveGameInstance())
+        distance := this.Memory.GetModronResetArea()
         ; skipAmount == 1 is a special case where Briv won't use stacks when he skips 0 areas.
         if (worstCase)
             jumps := skipAmount == 1 ? Floor(distance / (skipAmount+1)) : Floor(distance / (skipChance >= 1 ? skipAmount + 1 : skipAmount))
@@ -1118,10 +1192,10 @@ class IC_SharedFunctions_Class
     }
 
     ; Calculates the number of Haste stacks will be used to progress from the current zone to the modron reset area.
-    CalculateBrivStacksConsumedToReachModronResetZone()
+    CalculateBrivStacksConsumedToReachModronResetZone(worstCase := true)
     {
         stacks := ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadHasteStacks()
-        return stacks - this.CalculateBrivStacksLeftAtTargetZone(this.Memory.ReadCurrentZone(), this.Memory.GetCoreTargetAreaByInstance(this.Memory.ReadActiveGameInstance()))
+        return stacks - this.CalculateBrivStacksLeftAtTargetZone(this.Memory.ReadCurrentZone(), this.Memory.GetModronResetArea() + 1, worstCase)
     }
 
     ; Calculates the farthest zone Briv expects to jump to with his current stacks on his current zone.  avgMinOrMax: avg = 0, min = 1, max = 2.

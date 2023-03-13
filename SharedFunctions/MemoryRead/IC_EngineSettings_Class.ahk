@@ -16,12 +16,12 @@ class IC_EngineSettings_Class
  
     GetVersion()
     {
-        return "v2.0.1, 2022-08-19, IC v0.463+"  
+        return "v2.0.2, 2022-08-28, IC v0.463+"  
     }
 
     Refresh()
     {
-        this.Main := new _ClassMemory("ahk_exe IdleDragons.exe", "", hProcessCopy)
+        this.Main := new _ClassMemory("ahk_exe " . g_userSettings[ "ExeName"], "", hProcessCopy)
         this.BaseAddress := this.Main.getModuleBaseAddress("mono-2.0-bdwgc.dll")+this.moduleOffset
         this.UnityGameEngine := {}
         this.UnityGameEngine.Core := {}
@@ -30,11 +30,11 @@ class IC_EngineSettings_Class
         this.UnityGameEngine.Core.EngineSettings.Is64Bit := this.Main.isTarget64bit
         if(!this.Main.isTarget64bit)
         {
-            #include %A_LineFile%\..\Imports\IC_EngineSettings32_Import.ahk
+            #include *i %A_LineFile%\..\Imports\IC_EngineSettings32_Import.ahk
         }
         else
         {
-            #include %A_LineFile%\..\Imports\IC_EngineSettings64_Import.ahk    
+            #include *i %A_LineFile%\..\Imports\IC_EngineSettings64_Import.ahk    
         }
     }
 }

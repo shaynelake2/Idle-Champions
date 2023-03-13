@@ -1,9 +1,11 @@
 ﻿;Load user settings
 global g_BrivUserSettings := g_SF.LoadObjectFromJSON( A_LineFile . "\..\BrivGemFarmSettings.json" )
 global g_BrivFarm := new IC_BrivGemFarm_Class
+g_BrivFarm.GemFarmGUID := g_SF.LoadObjectFromJSON(A_LineFile . "\..\LastGUID_BrivGemFarm.json")
 global g_BrivFarmModLoc := A_LineFile . "\..\IC_BrivGemFarm_Mods.ahk"
 global g_BrivFarmAddonStartFunctions := {}
 global g_BrivFarmAddonStopFunctions := {}
+global g_BrivFarmLastRunMiniscripts := g_SF.LoadObjectFromJSON(A_LineFile . "\..\LastGUID_Miniscripts.json")
 
 GUIFunctions.AddTab("Briv Gem Farm")
 Gui, ICScriptHub:Tab, Briv Gem Farm
@@ -14,24 +16,20 @@ ReloadBrivGemFarmSettings()
 Gui, ICScriptHub:Add, Checkbox, vFkeysCheck Checked%Fkeys% x15 y+5, Level Champions with Fkeys?
 Gui, ICScriptHub:Add, Checkbox, vStackFailRecoveryCheck Checked%StackFailRecovery% x15 y+5, Enable manual resets to recover from failed Briv stacking?
 Gui, ICScriptHub:Add, Checkbox, vDisableDashWaitCheck Checked%DisableDashWait% x15 y+5, Disable Dash Wait?
-if(g_isDarkMode)
-    Gui, ICScriptHub:Font, g_CustomColor
+GUIFunctions.UseThemeTextColor("InputBoxTextColor")
 Gui, ICScriptHub:Add, Edit, vNewStackZone x15 y+5 w50, % g_BrivUserSettings[ "StackZone" ]
 Gui, ICScriptHub:Add, Edit, vNewMinStackZone x15 y+10 w50, % g_BrivUserSettings[ "MinStackZone" ]
 Gui, ICScriptHub:Add, Edit, vNewTargetStacks x15 y+10 w50, % g_BrivUserSettings[ "TargetStacks" ]
 Gui, ICScriptHub:Add, Edit, vNewRestartStackTime x15 y+10 w50, % g_BrivUserSettings[ "RestartStackTime" ]
-if(g_isDarkMode)
-    Gui, ICScriptHub:Font, cSilver
+GUIFunctions.UseThemeTextColor("DefaultTextColor")
 Gui, ICScriptHub:Add, Checkbox, vDoChestsCheck Checked%DoChests% x15 y+20, Enable server calls to buy and open chests during stack restart?
 Gui, ICScriptHub:Add, Checkbox, vBuySilversCheck Checked%BuySilvers% x15 y+5, Buy silver chests?
 Gui, ICScriptHub:Add, Checkbox, vBuyGoldsCheck Checked%BuyGolds% x15 y+5, Buy gold chests? Will not work if 'Buy Silver Chests?' is checked.
 Gui, ICScriptHub:Add, Checkbox, vOpenSilversCheck Checked%OpenSilvers% x15 y+5, Open silver chests?
 Gui, ICScriptHub:Add, Checkbox, vOpenGoldsCheck Checked%OpenGolds% x15 y+5, Open gold chests?
-if(g_isDarkMode)
-    Gui, ICScriptHub:Font, g_CustomColor
+GUIFunctions.UseThemeTextColor("InputBoxTextColor")
 Gui, ICScriptHub:Add, Edit, vNewMinGemCount x15 y+15 w100, % g_BrivUserSettings[ "MinGemCount" ]
-if(g_isDarkMode)
-    Gui, ICScriptHub:Font, cSilver
+GUIFunctions.UseThemeTextColor("DefaultTextColor")
 
 Gui, ICScriptHub:Add, Picture, x15 y+15 h50 w50 gBriv_Run_Clicked vBrivGemFarmPlayButton, %g_PlayButton%
 Gui, ICScriptHub:Add, Picture, x+15 h50 w50 gBriv_Run_Stop_Clicked vBrivGemFarmStopButton, %g_StopButton%
@@ -50,7 +48,8 @@ xyValY += 5
 Gui, ICScriptHub:Add, Text, x%xyValX% y%xyValY%+10, Farm SB stacks AFTER this zone
 Gui, ICScriptHub:Add, Text, x%xyValX% y+18, Minimum zone Briv can farm SB stacks on
 Gui, ICScriptHub:Add, Text, x%xyValX% y+18, Target Haste stacks for next run
-Gui, ICScriptHub:Add, Checkbox, vBrivAutoCalcStatsCheck Checked%BrivAutoCalcStats% x+10 gBrivAutoDetectStacks_Click, Auto Detect (Beta Feature)
+Gui, ICScriptHub:Add, Checkbox, vBrivAutoCalcStatsCheck Checked%BrivAutoCalcStats% x+10 gBrivAutoDetectStacks_Click, Auto Detect
+Gui, ICScriptHub:Add, Checkbox, vBrivAutoCalcStatsWorstCaseCheck Hidden Checked%BrivAutoCalcStats% x+10, Worst Case
 Gui, ICScriptHub:Add, Text, x%xyValX% y+18, `Time (ms) client remains closed to trigger Restart Stacking (0 disables)
 GuiControlGet, xyVal, ICScriptHub:Pos, NewMinGemCount
 xyValX += 105
@@ -117,28 +116,30 @@ class IC_BrivGemFarm_Component
         GuiControl,ICScriptHub:, OpenGoldsCheck, % g_BrivUserSettings[ "OpenGolds" ] 
         GuiControl,ICScriptHub:, DisableDashWaitCheck, % g_BrivUserSettings[ "DisableDashWait" ]
         GuiControl,ICScriptHub:, BrivAutoCalcStatsCheck, % g_BrivUserSettings[ "AutoCalculateBrivStacks" ]
+        GuiControl,ICScriptHub:, BrivAutoCalcStatsWorstCaseCheck, % g_BrivUserSettings[ "AutoCalculateWorstCase" ]
     }
     
     Briv_Run_Clicked()
     {
+        g_SF.WriteObjectToJSON(A_LineFile . "\..\LastGUID_Miniscripts.json", g_Miniscripts)
         for k,v in g_Miniscripts
         {
             try
             {
                 this.UpdateStatus("Starting Miniscript: " . v)
-                Run, %A_AhkPath% "%v%"
+                Run, %A_AhkPath% "%v%" "%k%"
             }
         }
         try
         {
-            SharedData := ComObjActive("{416ABC15-9EFC-400C-8123-D7D8778A2103}")
-            SharedData.ShowGui()
             Briv_Connect_Clicked()
+            SharedData := ComObjActive(g_BrivFarm.GemFarmGUID)
+            SharedData.ShowGui()
         }
         catch
         {
             ;g_BrivGemFarm.GemFarm()
-            g_SF.Hwnd := WinExist("ahk_exe IdleDragons.exe")
+            g_SF.Hwnd := WinExist("ahk_exe " . g_userSettings[ "ExeName"])
             g_SF.Memory.OpenProcessReader()
             scriptLocation := A_LineFile . "\..\IC_BrivGemFarm_Run.ahk"
             GuiControl, ICScriptHub:Choose, ModronTabControl, Stats
@@ -146,9 +147,16 @@ class IC_BrivGemFarm_Component
             {
                 v.Call()
             }
-            Run, %A_AhkPath% "%scriptLocation%"
+            GuidCreate := ComObjCreate("Scriptlet.TypeLib")
+            g_BrivFarm.GemFarmGUID := guid := GuidCreate.Guid
+            Run, %A_AhkPath% "%scriptLocation%" "%guid%"
         }
         this.TestGameVersion()
+    }
+
+    UpdateGUIDFromLast()
+    {
+        g_BrivFarm.GemFarmGUID := g_SF.LoadObjectFromJSON(A_LineFile . "\..\LastGUID_BrivGemFarm.json")
     }
 
     TestGameVersion()
@@ -180,10 +188,18 @@ class IC_BrivGemFarm_Component
                 SharedRunData.Close()
             }
         }
+        for k,v in g_BrivFarmLastRunMiniscripts
+        {
+            try
+            {
+                SharedRunData := ComObjActive(k)
+                SharedRunData.Close()
+            }
+        }
         this.UpdateStatus("Closing Gem Farm")
         try
         {
-            SharedRunData := ComObjActive("{416ABC15-9EFC-400C-8123-D7D8778A2103}")
+            SharedRunData := ComObjActive(g_BrivFarm.GemFarmGUID)
             SharedRunData.Close()
         }
         catch, err
@@ -199,16 +215,17 @@ class IC_BrivGemFarm_Component
     Briv_Connect_Clicked()
     {   
         this.UpdateStatus("Connecting to Gem Farm...") 
+        this.UpdateGUIDFromLast()
         Try 
         {
-            ComObjActive("{416ABC15-9EFC-400C-8123-D7D8778A2103}")
+            ComObjActive(g_BrivFarm.GemFarmGUID)
         }
         Catch
         {
             this.UpdateStatus("Gem Farm not running.") 
             return
         }
-        g_SF.Hwnd := WinExist("ahk_exe IdleDragons.exe")
+        g_SF.Hwnd := WinExist("ahk_exe " . g_userSettings[ "ExeName"])
         g_SF.Memory.OpenProcessReader()
         for k,v in g_BrivFarmAddonStartFunctions
         {
@@ -237,10 +254,11 @@ class IC_BrivGemFarm_Component
         g_BrivUserSettings[ "OpenGolds" ] := OpenGoldsCheck
         g_BrivUserSettings[ "MinGemCount" ] := StrReplace(NewMinGemCount, ",")
         g_BrivUserSettings[ "AutoCalculateBrivStacks" ] := BrivAutoCalcStatsCheck
+        g_BrivUserSettings[ "AutoCalculateWorstCase" ] := BrivAutoCalcStatsWorstCaseCheck
         g_SF.WriteObjectToJSON( A_LineFile . "\..\BrivGemFarmSettings.json" , g_BrivUserSettings )
         try ; avoid thrown errors when comobject is not available.
         {
-            local SharedRunData := ComObjActive("{416ABC15-9EFC-400C-8123-D7D8778A2103}")
+            local SharedRunData := ComObjActive(g_BrivFarm.GemFarmGUID)
             SharedRunData.ReloadSettings("RefreshSettingsView")
         }
         this.UpdateStatus("Save complete.")
