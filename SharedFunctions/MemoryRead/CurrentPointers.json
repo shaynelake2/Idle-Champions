@@ -3,7 +3,7 @@
 		"moduleAddress":4862904,
 		"moduleOffset":[
 			528,
-			2976
+			3136
 		],
 		"staticOffset":""
 	},
@@ -35,5 +35,7 @@
 		],
 		"staticOffset":""
 	},
-	"is64":1
+	"is64":1,
+	"Platform":"EGS",
+	"Version":497
 }
