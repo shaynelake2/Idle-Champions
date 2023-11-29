@@ -37,6 +37,7 @@ global g_BrivUserSettingsFromAddons := {}
 #include *i %A_LineFile%\..\IC_BrivGemFarm_Mods.ahk
 #include %A_LineFile%\..\IC_BrivGemFarm_Settings.ahk
 #include %A_LineFile%\..\..\..\SharedFunctions\IC_GUIFunctions_Class.ahk
+#include %A_LineFile%\..\..\..\SharedFunctions\IC_UpdateClass_Class.ahk
 
 ;check if first run
 If !IsObject( g_UserSettings )
@@ -56,6 +57,22 @@ try
     else
         Menu, Tray, Icon, shell32.dll, 138
 }
+
+; Update SharedData class from SharedFunctions to have extra steps when closing the script.
+class IC_BrivGemFarmRun_SharedData_Class
+{
+    Close()
+    {
+        if (g_SF.Memory.ReadCurrentZone() == "") ; Invalid game state
+            ExitApp
+        g_SF.WaitForTransition()
+        g_SF.FallBackFromZone()
+        g_SF.ToggleAutoProgress(false, false, true)
+        ExitApp
+    }
+}
+IC_UpdateClass_Class.UpdateClassFunctions(g_SharedData, IC_BrivGemFarmRun_SharedData_Class)
+
 ;Gui, BrivPerformanceGemFarm:New, -LabelMain +hWndhMainWnd -Resize
 Gui, BrivPerformanceGemFarm:New, -Resize
 GUIFunctions.LoadTheme("BrivPerformanceGemFarm")
@@ -68,7 +85,10 @@ GUIFunctions.UseThemeListViewBackgroundColor("BrivFarmSettingsID")
 Gui, BrivPerformanceGemFarm:Add, Checkbox, vAdvancedBrivSettingsCheck Checked%isAdvancedBrivSettings% gReloadSettingsView_Click x55 y+5, See Advanced (All) Settings.
 ReloadBrivGemFarmSettingsDisplay() ; load settings file.
 if ( !g_BrivUserSettings[ "HiddenFarmWindow" ])
-    Gui, BrivPerformanceGemFarm:Show,% "x" . g_BrivUserSettings[ "WindowXPositon" ] " y" . g_BrivUserSettings[ "WindowYPositon" ], Running Gem Farm...
+{
+    Gui, BrivPerformanceGemFarm:Show,% "x" . g_BrivUserSettings[ "WindowXPosition" ] " y" . g_BrivUserSettings[ "WindowYPosition" ], Running Gem Farm...
+    GUIFunctions.UseThemeTitleBar("BrivPerformanceGemFarm")
+}
 
 ReloadBrivGemFarmSettingsDisplay()
 {
@@ -84,15 +104,11 @@ ReloadBrivGemFarmSettingsDisplay()
         LV_Add(, "Target Haste stacks: ", g_BrivUserSettings[ "TargetStacks" ])
     LV_Add(, "Stacking Restart wait time: ", g_BrivUserSettings[ "RestartStackTime" ])
     LV_Add(, "Auto Calculate Briv Stacks? ", g_BrivUserSettings[ "AutoCalculateBrivStacks" ] ? "Yes" : "No")
-    LV_Add(, "Buy and open Chests? ", g_BrivUserSettings[ "DoChests" ] ? "Yes" : "No")		
-    if(g_BrivUserSettings[ "DoChests" ])
-    {
-        LV_Add(, "Buy Silver? ", g_BrivUserSettings[ "BuySilvers" ] ? "Yes" : "No")
-        LV_Add(, "Buy Gold? ", g_BrivUserSettings[ "BuyGolds" ] ? "Yes" : "No")
-        LV_Add(, "Open Silver? ", g_BrivUserSettings[ "OpenSilvers" ] ? "Yes" : "No")
-        LV_Add(, "Open Gold? ", g_BrivUserSettings[ "OpenGolds" ] ? "Yes" : "No")
-        LV_Add(, "Required Gems to Buy: ", g_BrivUserSettings[ "MinGemCount" ])
-    }
+    LV_Add(, "Buy Silver? ", g_BrivUserSettings[ "BuySilvers" ] ? "Yes" : "No")
+    LV_Add(, "Buy Gold? ", g_BrivUserSettings[ "BuyGolds" ] ? "Yes" : "No")
+    LV_Add(, "Open Silver? ", g_BrivUserSettings[ "OpenSilvers" ] ? "Yes" : "No")
+    LV_Add(, "Open Gold? ", g_BrivUserSettings[ "OpenGolds" ] ? "Yes" : "No")
+    LV_Add(, "Required Gems to Buy: ", g_BrivUserSettings[ "MinGemCount" ])
     LV_ModifyCol()
 }
 
@@ -157,10 +173,6 @@ ComObjectRevoke()
     ObjRegisterActive(g_SharedData, "")
     ExitApp
 }
-
-$SC045::
-Pause
-return 
 
 BrivPerformanceGemFarmGuiClose()
 {

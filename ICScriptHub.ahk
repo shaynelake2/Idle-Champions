@@ -1,8 +1,10 @@
+#Requires AutoHotkey 1.1.33+ <1.2
 #SingleInstance force
 ;put together with the help from many different people. thanks for all the help.
 #HotkeyInterval 1000  ; The default value is 2000 (milliseconds).
 #MaxHotkeysPerInterval 70 ; The default value is 70
 #NoEnv ; Avoids checking empty variables to see if they are environment variables (recommended for all new scripts). Default behavior for AutoHotkey v2.
+; #Warn ALL, OutputDebug
 ;=======================
 ;Script Optimization
 ;=======================
@@ -21,7 +23,7 @@ CoordMode, Mouse, Client
 ;Modron Automation Gem Farming Script
 GetScriptHubVersion()
 {
-    return "v3.5.1, 2022-09-01"
+    return "v3.6.2, 2023-11-14"
 }
 
 ;class and methods for parsing JSON (User details sent back from a server call)
@@ -36,7 +38,6 @@ global g_ServerCall
 global g_UserSettings := {}
 global g_TabControlHeight := 630
 global g_TabControlWidth := 430
-global g_SF := new IC_SharedFunctions_Class ; includes MemoryFunctions in g_SF.Memory
 global g_InputsSent := 0
 global g_TabList := ""
 global g_PlayButton := A_LineFile . "\..\Images\play-100x100.png"
@@ -54,8 +55,7 @@ if (GUIfunctions.isDarkMode)
     g_ReloadButton := A_LineFile . "\..\Images\refresh-smooth-white-25x25.png"
 
 ;Load user settings
-g_UserSettings := g_SF.LoadObjectFromJSON( A_LineFile . "\..\Settings.json" )
-
+g_UserSettings := IC_SharedFunctions_Class.LoadObjectFromJSON( A_LineFile . "\..\Settings.json" )
 ;check if first run
 If !IsObject( g_UserSettings )
 {
@@ -66,24 +66,27 @@ if ( g_UserSettings[ "InstallPath" ] == "" )
     g_UserSettings[ "InstallPath" ] := "C:\Program Files (x86)\Steam\steamapps\common\IdleChampions\IdleDragons.exe"
 if (g_UserSettings[ "ExeName"] == "")
     g_UserSettings[ "ExeName"] := "IdleDragons.exe"
-if ( g_UserSettings[ "WindowXPositon" ] == "" )
-    g_UserSettings[ "WindowXPositon" ] := 0
-if ( g_UserSettings[ "WindowYPositon" ] == "" )
-    g_UserSettings[ "WindowYPositon" ] := 0
+if ( g_UserSettings[ "WindowXPosition" ] == "" )
+    g_UserSettings[ "WindowXPosition" ] := 0
+if ( g_UserSettings[ "WindowYPosition" ] == "" )
+    g_UserSettings[ "WindowYPosition" ] := 0
 if ( g_UserSettings[ "NoCtrlKeypress" ] == "" )
     g_UserSettings[ "NoCtrlKeypress" ] := 0
 if ( g_UserSettings[ "WaitForProcessTime" ] == "" )
     g_UserSettings[ "WaitForProcessTime" ] := 0
-if(g_UserSettings[ "WriteSettings" ] := true)
+if(g_UserSettings[ "WriteSettings" ] == true)
 {
     g_UserSettings.Delete("WriteSettings")
-    g_SF.WriteObjectToJSON( A_LineFile . "\..\Settings.json" , g_UserSettings )
+    IC_SharedFunctions_Class.WriteObjectToJSON( A_LineFile . "\..\Settings.json" , g_UserSettings )
 }
 
 
+global g_SF := new IC_SharedFunctions_Class ; includes MemoryFunctions in g_SF.Memory
+
 ;define a new gui with tabs and buttons
 Gui, ICScriptHub:New
-Gui, ICScriptHub:+Resize -MaximizeBox
+Gui, ICScriptHub:+Resize -MaximizeBox 
+Gui, ICScriptHub: +HwndGUIICScriptHub
 ;Gui, ICScriptHub:Add, Button, x4 y5 w50 gReload_Clicked, `Reload
 ;Gui, ICScriptHub:Add, Button, x+20 gLaunch_Clicked, Launch IC
 global g_MenuBarXPos:=4
@@ -92,12 +95,13 @@ GUIFunctions.AddButton(g_ReloadButton,"Reload_Clicked","ReloadClickButton")
 
 GUIFunctions.UseThemeTextColor()
 ; Needed to add tabs
-Gui, ICScriptHub:Add, Tab3, x5 y32 w%TabControlWidth%+40 h%TabControlHeight%+40 vModronTabControl, %g_TabList%
+Gui, ICScriptHub:Add, Tab3, x5 y32 w%g_TabControlWidth%+40 h%g_TabControlHeight%+40 vModronTabControl, %g_TabList%
 ; Set specific tab ordering for prioritized scripts.
 
 GuiControl, Move, ICScriptHub:ModronTabControl, % "w" . g_TabControlWidth . " h" . g_TabControlHeight
 GUIFunctions.UseThemeBackgroundColor()
-Gui, ICScriptHub:Show, %  "x" . g_UserSettings[ "WindowXPositon" ] " y" . g_UserSettings[ "WindowYPositon" ] . " w" . g_TabControlWidth+5 . " h" . g_TabControlHeight, % "IC Script Hub" . (g_UserSettings[ "WindowTitle" ] ? (" - " .  g_UserSettings[ "WindowTitle" ]) : "")
+Gui, ICScriptHub:Show, %  "x" . g_UserSettings[ "WindowXPosition" ] " y" . g_UserSettings[ "WindowYPosition" ] . " w" . g_TabControlWidth+5 . " h" . g_TabControlHeight, % "IC Script Hub" . (g_UserSettings[ "WindowTitle" ] ? (" - " .  g_UserSettings[ "WindowTitle" ]) : "") . "  (Loading...)"
+GUIFunctions.UseThemeTitleBar("ICScriptHub")
 ;WinSet, Style, -0xC00000, A  ; Remove the active window's title bar (WS_CAPTION).
 
 Reload_Clicked()
@@ -109,7 +113,14 @@ Reload_Clicked()
 Launch_Clicked()
 {
     programLoc := g_UserSettings[ "InstallPath" ]
-    Run, %programLoc%
+    try
+    {
+        Run, %programLoc%
+    }
+    catch
+    {
+        MsgBox, 48, Unable to launch game, `nVerify the game location is set properly by enabling the Game Location Settings addon, clicking Change Game Location on the Briv Gem Farm tab, and ensuring the launch command is set properly.
+    }
     Process, Exist, % g_UserSettings[ "ExeName"]
     g_SF.PID := ErrorLevel
 }
@@ -144,9 +155,10 @@ BuildToolTips()
 ; Shows a tooltip if the control with mouseover has a tooltip associated with it.
 CheckControlForTooltip()
 {
-        MouseGetPos,,,, VarControl
-        if(VarControl)
-            ToolTip % g_MouseToolTips[VarControl]
+        MouseGetPos,,,VarWin, VarControl
+        varTTLoc := VarWin . VarControl
+        if(varTTLoc)
+            ToolTip % g_MouseToolTips[varTTLoc]
         else
             ToolTip
         SetTimer, HideToolTip, -3000
@@ -174,6 +186,7 @@ BuildToolTips()
 if(IsObject(AddonManagement))
     AddonManagement.BuildToolTips()
 
+Gui, ICScriptHub:Show,, % "IC Script Hub" . (g_UserSettings[ "WindowTitle" ] ? (" - " .  g_UserSettings[ "WindowTitle" ]) : "")
 
 StopMiniscripts()
 {
