@@ -7,13 +7,8 @@ this.game.gameInstances.timeScales._CollectionValType := "CrusadersGame.Champion
 this.game.gameInstances.ResetHandler := New GameObjectStructure(this.game.gameInstances,"Int", [0x40])
 this.game.gameInstances.ResetHandler.resetting := New GameObjectStructure(this.game.gameInstances.ResetHandler,"Char", [0x38])
 this.game.gameInstances.Controller := New GameObjectStructure(this.game.gameInstances,"Int", [0x18])
-<<<<<<< HEAD
-this.game.gameInstances.Controller.userData := New GameObjectStructure(this.game.gameInstances.Controller,"Int", [0xb8])
-this.game.gameInstances.Controller.userData.ActiveUserGameInstance := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x294])
-=======
 this.game.gameInstances.Controller.userData := New GameObjectStructure(this.game.gameInstances.Controller,"Int", [0xc0])
 this.game.gameInstances.Controller.userData.ActiveUserGameInstance := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x29c])
->>>>>>> upstream/main
 this.game.gameInstances.Controller.userData.BuffHandler := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x28])
 this.game.gameInstances.Controller.userData.BuffHandler.inventoryBuffs := New GameObjectStructure(this.game.gameInstances.Controller.userData.BuffHandler,"List", [0x20])
 this.game.gameInstances.Controller.userData.BuffHandler.inventoryBuffs._CollectionValType := "CrusadersGame.Defs.BuffDef"
@@ -65,12 +60,8 @@ this.game.gameInstances.Controller.userData.HeroHandler.heroes := New GameObject
 this.game.gameInstances.Controller.userData.HeroHandler.heroes._CollectionValType := "CrusadersGame.GameScreen.Hero"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.def := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Int", [0x18])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.def.name := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.def,"UTF-16", [0x38])
-<<<<<<< HEAD
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.def.SeatID := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.def,"Int", [0x1d0])
-=======
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.def.ID := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.def,"Int", [0x10])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.def.SeatID := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.def,"Int", [0x1d8])
->>>>>>> upstream/main
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Int", [0xa8])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects,"Dict", [0x58])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName._CollectionKeyType := "System.String"
@@ -78,15 +69,9 @@ this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKey
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName,"List", [])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List._CollectionValType := "CrusadersGame.Effects.EffectKey"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List,"Int", [0x10])
-<<<<<<< HEAD
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler.activeEffectHandlers := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler,"List", [0x130])
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler.activeEffectHandlers._CollectionValType := "CrusadersGame.Effects.ActiveEffectKeyHandler"
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Dict", [0x2c0])
-=======
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler.activeEffectHandlers := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler,"List", [0x148])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.effects.effectKeysByKeyName.List.parentEffectKeyHandler.activeEffectHandlers._CollectionValType := "CrusadersGame.Effects.ActiveEffectKeyHandler"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Dict", [0x2c8])
->>>>>>> upstream/main
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades._CollectionKeyType := "System.Int32"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades._CollectionValType := "CrusadersGame.Defs.UpgradeDef"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades.ID := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades,"Int", [0x10])
@@ -95,11 +80,7 @@ this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades.Requi
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades.RequiredUpgradeID := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades,"Int", [0x8c])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades.defaultSpecGraphic := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades,"Int", [0x90])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades.IsPurchased := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgrades,"Char", [0xa8])
-<<<<<<< HEAD
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Dict", [0x2c8])
-=======
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Dict", [0x2d0])
->>>>>>> upstream/main
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered._CollectionKeyType := "CrusadersGame.ChampionsGameInstance"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered._CollectionValType := "System.Collections.Generic.List<CrusadersGame.Defs.UpgradeDef>"
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered,"List", [])
@@ -110,21 +91,12 @@ this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdere
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List.RequiredUpgradeID := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List,"Int", [0x8c])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List.defaultSpecGraphic := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List,"Int", [0x90])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List.IsPurchased := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes.allUpgradesOrdered.List,"Char", [0xa8])
-<<<<<<< HEAD
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.health := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Double", [0x360])
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.slotId := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Int", [0x314])
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.Owned := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Char", [0x310])
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.Benched := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Char", [0x320])
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.level := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Int", [0x33c])
-this.game.gameInstances.Controller.userData.HeroHandler.heroes.purchasedUpgradeIDs := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"HashSet", [0x2d0])
-=======
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.health := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Double", [0x370])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.slotId := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Int", [0x320])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.Owned := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Char", [0x31c])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.Benched := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Char", [0x32c])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.level := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"Int", [0x348])
 this.game.gameInstances.Controller.userData.HeroHandler.heroes.purchasedUpgradeIDs := New GameObjectStructure(this.game.gameInstances.Controller.userData.HeroHandler.heroes,"HashSet", [0x2d8])
->>>>>>> upstream/main
 this.game.gameInstances.ClickLevel := New GameObjectStructure(this.game.gameInstances,"Int", [0x108])
 this.game.gameStarted := New GameObjectStructure(this.game,"Char", [0x100])
 this.game.gameInstances.ResetsSinceLastManual := New GameObjectStructure(this.game.gameInstances,"Int", [0xf4])
@@ -134,11 +106,7 @@ this.game.gameInstances.Controller.area.Active := New GameObjectStructure(this.g
 this.game.gameInstances.Controller.area.basicMonstersSpawnedThisArea := New GameObjectStructure(this.game.gameInstances.Controller.area,"Int", [0x240])
 this.game.gameInstances.Controller.area.activeMonsters := New GameObjectStructure(this.game.gameInstances.Controller.area,"List", [0x48])
 this.game.gameInstances.Controller.area.activeMonsters._CollectionValType := "CrusadersGame.GameScreen.Monster"
-<<<<<<< HEAD
-this.game.gameInstances.Controller.area.secondsSinceStarted := New GameObjectStructure(this.game.gameInstances.Controller.area,"Float", [0x20c])
-=======
 this.game.gameInstances.Controller.area.secondsSinceStarted := New GameObjectStructure(this.game.gameInstances.Controller.area,"Float", [0x204])
->>>>>>> upstream/main
 this.TimeScale := New GameObjectStructure(this.IdleGameManager,"Float", [0x80])
 this.game.gameInstances.Controller.areaTransitioner := New GameObjectStructure(this.game.gameInstances.Controller,"Int", [0x40])
 this.game.gameInstances.Controller.areaTransitioner.IsTransitioning_k__BackingField := New GameObjectStructure(this.game.gameInstances.Controller.areaTransitioner,"Char", [0x38])
@@ -156,17 +124,6 @@ this.game.screenController.activeScreen.currentScreenWidth := New GameObjectStru
 this.game.screenController.activeScreen.currentScreenHeight := New GameObjectStructure(this.game.screenController.activeScreen,"Int", [0x358])
 this.game.gameUser := New GameObjectStructure(this.game,"Int", [0xa8])
 this.game.gameUser.Hash := New GameObjectStructure(this.game.gameUser,"UTF-16", [0x20])
-<<<<<<< HEAD
-this.game.gameUser.ID := New GameObjectStructure(this.game.gameUser,"Int", [0x58])
-this.game.gameInstances.Controller.userData.inited := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Char", [0x280])
-this.game.gameInstances.Controller.userData.redRubies := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x264])
-this.game.gameInstances.Controller.userData.redRubiesSpent := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x268])
-this.game.gameInstances.Controller.userData.StatHandler := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x30])
-this.game.gameInstances.Controller.userData.StatHandler.BlackViperTotalGems := New GameObjectStructure(this.game.gameInstances.Controller.userData.StatHandler,"Int", [0x2b0])
-this.game.gameInstances.Controller.userData.StatHandler.BrivSteelbonesStacks := New GameObjectStructure(this.game.gameInstances.Controller.userData.StatHandler,"Int", [0x310])
-this.game.gameInstances.Controller.userData.StatHandler.BrivSprintStacks := New GameObjectStructure(this.game.gameInstances.Controller.userData.StatHandler,"Int", [0x314])
-this.game.gameInstances.StatHandler := New GameObjectStructure(this.game.gameInstances,"Int", [0x48])
-=======
 this.game.gameUser.ID := New GameObjectStructure(this.game.gameUser,"Int", [0x60])
 this.game.gameInstances.Controller.userData.inited := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Char", [0x288])
 this.game.gameInstances.Controller.userData.redRubies := New GameObjectStructure(this.game.gameInstances.Controller.userData,"Int", [0x26c])
@@ -178,7 +135,6 @@ this.game.gameInstances.Controller.userData.StatHandler.BrivSprintStacks := New 
 this.game.gameInstances.Controller.userData.StatHandler.Resets := New GameObjectStructure(this.game.gameInstances.Controller.userData.StatHandler,"Int", [0xa8])
 this.game.gameInstances.StatHandler := New GameObjectStructure(this.game.gameInstances,"Int", [0x48])
 this.game.gameInstances.StatHandler.DSpec1HeroId := New GameObjectStructure(this.game.gameInstances.StatHandler,"Int", [0x27c])
->>>>>>> upstream/main
 this.game.gameInstances.StatHandler.NordomAwardedEXP := New GameObjectStructure(this.game.gameInstances.StatHandler,"Int", [0x284])
 this.game.gameInstances.ActiveCampaignData := New GameObjectStructure(this.game.gameInstances,"Int", [0x28])
 this.game.gameInstances.ActiveCampaignData.currentObjective := New GameObjectStructure(this.game.gameInstances.ActiveCampaignData,"Int", [0x18])
@@ -193,15 +149,9 @@ this.game.gameInstances.FormationSaveHandler := New GameObjectStructure(this.gam
 this.game.gameInstances.FormationSaveHandler.formationCampaignID := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler,"Int", [0x78])
 this.game.gameInstances.FormationSaveHandler.formationSavesV2 := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler,"List", [0x30])
 this.game.gameInstances.FormationSaveHandler.formationSavesV2._CollectionValType := "CrusadersGame.Defs.FormationSaveV2Def"
-<<<<<<< HEAD
-this.game.gameInstances.FormationSaveHandler.formationSavesV2.Favorite := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"Int", [0x40])
-this.game.gameInstances.FormationSaveHandler.formationSavesV2.SaveID := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"Int", [0x38])
-this.game.gameInstances.FormationSaveHandler.formationSavesV2.Name := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"UTF-16", [0x30])
-=======
 this.game.gameInstances.FormationSaveHandler.formationSavesV2.Favorite := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"Int", [0x48])
 this.game.gameInstances.FormationSaveHandler.formationSavesV2.SaveID := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"Int", [0x40])
 this.game.gameInstances.FormationSaveHandler.formationSavesV2.Name := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"UTF-16", [0x38])
->>>>>>> upstream/main
 this.game.gameInstances.FormationSaveHandler.formationSavesV2.Formation := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"List", [0x18])
 this.game.gameInstances.FormationSaveHandler.formationSavesV2.Formation._CollectionValType := "System.Int32"
 this.game.gameInstances.FormationSaveHandler.formationSavesV2.Specializations := New GameObjectStructure(this.game.gameInstances.FormationSaveHandler.formationSavesV2,"Dict", [0x28])
@@ -220,28 +170,16 @@ this.game.gameInstances.Controller.formation.slots._CollectionValType := "Crusad
 this.game.gameInstances.Controller.formation.slots.hero := New GameObjectStructure(this.game.gameInstances.Controller.formation.slots,"Int", [0x28])
 this.game.gameInstances.Controller.formation.slots.hero.def := New GameObjectStructure(this.game.gameInstances.Controller.formation.slots.hero,"Int", [0x18])
 this.game.gameInstances.Controller.formation.slots.hero.def.ID := New GameObjectStructure(this.game.gameInstances.Controller.formation.slots.hero.def,"Int", [0x10])
-<<<<<<< HEAD
-this.game.gameInstances.Controller.formation.slots.heroAlive := New GameObjectStructure(this.game.gameInstances.Controller.formation.slots,"Char", [0x239])
-this.game.gameInstances.Controller.formation.TransitionOverrides := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Dict", [0xa8])
-=======
 this.game.gameInstances.Controller.formation.slots.heroAlive := New GameObjectStructure(this.game.gameInstances.Controller.formation.slots,"Char", [0x241])
 this.game.gameInstances.Controller.formation.TransitionOverrides := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Dict", [0xd8])
->>>>>>> upstream/main
 this.game.gameInstances.Controller.formation.TransitionOverrides._CollectionKeyType := "CrusadersGame.GameScreen.Formations.FormationSlotRunHandler.TransitionDirection"
 this.game.gameInstances.Controller.formation.TransitionOverrides._CollectionValType := "System.Collections.Generic.List<System.Action<System.Action>>"
 this.game.gameInstances.Controller.formation.TransitionOverrides.List := New GameObjectStructure(this.game.gameInstances.Controller.formation.TransitionOverrides,"List", [])
 this.game.gameInstances.Controller.formation.TransitionOverrides.List._CollectionValType := "System.Action<System.Action>"
-<<<<<<< HEAD
-this.game.gameInstances.Controller.formation.transitionDir := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Int", [0x194])
-this.game.gameInstances.Controller.formation.inAreaTransition := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Char", [0x198])
-this.game.gameInstances.Controller.formation.numAttackingMonstersReached := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Int", [0x1a0])
-this.game.gameInstances.Controller.formation.numRangedAttackingMonsters := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Int", [0x1a4])
-=======
 this.game.gameInstances.Controller.formation.transitionDir := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Int", [0x1cc])
 this.game.gameInstances.Controller.formation.inAreaTransition := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Char", [0x1d0])
 this.game.gameInstances.Controller.formation.numAttackingMonstersReached := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Int", [0x1d8])
 this.game.gameInstances.Controller.formation.numRangedAttackingMonsters := New GameObjectStructure(this.game.gameInstances.Controller.formation,"Int", [0x1dc])
->>>>>>> upstream/main
 this.game.gameInstances.OfflineHandler := New GameObjectStructure(this.game.gameInstances,"Int", [0x20])
 this.game.gameInstances.OfflineHandler.OfflineTimeRequested_k__BackingField := New GameObjectStructure(this.game.gameInstances.OfflineHandler,"Int", [0xcc])
 this.game.gameInstances.OfflineHandler.OfflineTimeSimulated_k__BackingField := New GameObjectStructure(this.game.gameInstances.OfflineHandler,"Int", [0xd0])
@@ -255,14 +193,9 @@ this.game.gameInstances.Screen.uiController.topBar.objectiveProgressBox.areaBar 
 this.game.gameInstances.Screen.uiController.topBar.objectiveProgressBox.areaBar.autoProgressButton := New GameObjectStructure(this.game.gameInstances.Screen.uiController.topBar.objectiveProgressBox.areaBar,"Int", [0x360])
 this.game.gameInstances.Screen.uiController.topBar.objectiveProgressBox.areaBar.autoProgressButton.toggled := New GameObjectStructure(this.game.gameInstances.Screen.uiController.topBar.objectiveProgressBox.areaBar.autoProgressButton,"Char", [0x3ca])
 this.game.gameInstances.Screen.uiController.bottomBar := New GameObjectStructure(this.game.gameInstances.Screen.uiController,"Int", [0x20])
-<<<<<<< HEAD
-this.game.gameInstances.Screen.uiController.bottomBar.heroPanel := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar,"Int", [0x378])
-this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar.heroPanel,"List", [0x3b8])
-=======
 this.game.gameInstances.Screen.uiController.bottomBar.levelUpAmount := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar,"Int", [0x438])
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar,"Int", [0x380])
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar.heroPanel,"List", [0x3b0])
->>>>>>> upstream/main
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes._CollectionValType := "CrusadersGame.GameScreen.UIComponents.BottomBar.HeroBox"
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes.nextUpgrade := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes,"Int", [0x400])
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes.nextUpgrade.IsPurchased := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.activeBoxes.nextUpgrade,"Char", [0xa8])
@@ -275,21 +208,13 @@ this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.heroBoxsBySeat.m
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.heroBoxsBySeat.levelUpButtonDisplay := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.heroBoxsBySeat,"Int", [0x398])
 this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.heroBoxsBySeat.levelUpButtonDisplay.lastCostText := New GameObjectStructure(this.game.gameInstances.Screen.uiController.bottomBar.heroPanel.heroBoxsBySeat.levelUpButtonDisplay,"UTF-16", [0x378])
 this.game.gameInstances.Screen.uiController.ultimatesBar := New GameObjectStructure(this.game.gameInstances.Screen.uiController,"Int", [0x28])
-<<<<<<< HEAD
-this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar,"List", [0x3a0])
-=======
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar,"List", [0x398])
->>>>>>> upstream/main
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems._CollectionValType := "CrusadersGame.GameScreen.UIComponents.UltimatesBar.UltimatesBarItem"
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.hero := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems,"Int", [0x390])
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.hero.def := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.hero,"Int", [0x18])
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.hero.def.ID := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.hero.def,"Int", [0x10])
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.ultimateAttack := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems,"Int", [0x398])
-<<<<<<< HEAD
-this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.ultimateAttack.CooldownTimer := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.ultimateAttack,"Float", [0xb0])
-=======
 this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.ultimateAttack.internalCooldownTimer := New GameObjectStructure(this.game.gameInstances.Screen.uiController.ultimatesBar.ultimateItems.ultimateAttack,"Float", [0xb0])
->>>>>>> upstream/main
 this.game.gameInstances.Screen.uiController.notificationManager := New GameObjectStructure(this.game.gameInstances.Screen.uiController,"Int", [0x68])
 this.game.gameInstances.Screen.uiController.notificationManager.notificationDisplay := New GameObjectStructure(this.game.gameInstances.Screen.uiController.notificationManager,"Int", [0x18])
 this.game.gameInstances.Screen.uiController.notificationManager.notificationDisplay.welcomeBackNotification := New GameObjectStructure(this.game.gameInstances.Screen.uiController.notificationManager.notificationDisplay,"Int", [0x348])
