@@ -1,0 +1,96 @@
+{
+	"About":{
+		"Enabled":1,
+		"Version":"v0.1.1"
+	},
+	"Addon Order":[
+		{
+			"Name":"Addon Example",
+			"Version":"v0.1."
+		},
+		{
+			"Name":"About",
+			"Version":"v0.1.1"
+		},
+		{
+			"Name":"Briv Gem Farm",
+			"Version":"v1.3.0"
+		},
+		{
+			"Name":"BrivGemFarm Advanced Settings",
+			"Version":"v0.1.0"
+		},
+		{
+			"Name":"Briv Gem Farm Potato",
+			"Version":"v1.0.1"
+		},
+		{
+			"Name":"Briv Gem Farm Stats",
+			"Version":"v1.0.5"
+		},
+		{
+			"Name":"Chest Purchaser",
+			"Version":"v0.1.2"
+		},
+		{
+			"Name":"Game Location Settings",
+			"Version":"v0.1.1"
+		},
+		{
+			"Name":"Inventory View",
+			"Version":"v0.1.3"
+		},
+		{
+			"Name":"Jimothy",
+			"Version":"v1.0.3"
+		},
+		{
+			"Name":"Memory Functions",
+			"Version":"v0.1.1"
+		},
+		{
+			"Name":"Memory Functions Full Read",
+			"Version":"v0.1."
+		}
+	],
+	"Briv Gem Farm":{
+		"Enabled":1,
+		"Version":"v1.3.0"
+	},
+	"Briv Gem Farm Potato":{
+		"Enabled":1,
+		"Version":"v1.0.1"
+	},
+	"Briv Gem Farm Stats":{
+		"Enabled":1,
+		"Version":"v1.0.5"
+	},
+	"BrivGemFarm Advanced Settings":{
+		"Enabled":1,
+		"Version":"v0.1.0"
+	},
+	"Chest Purchaser":{
+		"Enabled":1,
+		"Version":"v0.1.2"
+	},
+	"Game Location Settings":{
+		"Enabled":1,
+		"Version":"v0.1.1"
+	},
+	"Inventory View":{
+		"Enabled":1,
+		"Version":"v0.1.3"
+	},
+	"Jimothy":{
+		"Enabled":1,
+		"Version":"v1.0.3"
+	},
+	"Memory Functions":{
+		"Enabled":1,
+		"Version":"v0.1.1"
+	},
+	"Memory Functions Full Read":{
+		"Enabled":1,
+		"Version":"v0.1."
+	}
+}
